@@ -1,11 +1,692 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bombo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ro! · Norge</title>
+<style>
+  :root {
+    --rojo: #c8102e;        /* rojo Noruega */
+    --rojo-osc: #9d0b24;
+    --rojo-borde: #6f0819;
+    --azul: #00205b;        /* azul marino Noruega */
+    --azul-osc: #001233;
+    --blanco: #ffffff;
+    --hueso: #f4f6fb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  html { background-color: var(--rojo); }
+  body {
+    /* Bandera de Noruega: campo rojo + cruz blanca + cruz azul encima */
+    background-color: var(--rojo);
+    background-image:
+      linear-gradient(var(--azul), var(--azul)),      /* azul vertical */
+      linear-gradient(var(--azul), var(--azul)),      /* azul horizontal */
+      linear-gradient(var(--blanco), var(--blanco)),  /* blanco vertical */
+      linear-gradient(var(--blanco), var(--blanco));  /* blanco horizontal */
+    background-repeat: no-repeat;
+    background-position: 34.99% 50%, 50% 50%, 33.33% 50%, 50% 50%;
+    background-size: 9.09% 100%, 100% 12.5%, 18.18% 100%, 100% 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 34px;
+    font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+    color: var(--blanco);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    overflow: hidden;
+    position: relative;
+    min-height: 100vh;
+  }
+  /* Cruz nórdica de fondo: dibujada en el background del body (bandera de Noruega) */
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 34px;
+  }
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 900;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    font-size: clamp(1.2rem, 5.5vw, 2.1rem);
+    text-indent: 0.42em;
+    color: var(--rojo);
+    background: var(--blanco);
+    padding: 6px 20px 6px 26px;
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  }
+  .flag {
+    width: 34px; height: auto; border-radius: 3px;
+    display: block;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.06);
+    flex: none;
+  }
+
+  .bombo {
+    position: relative;
+    width: min(66vw, 330px);
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    background:
+      radial-gradient(circle at 38% 34%, #ffffff 0%, var(--hueso) 40%, #e2c9cf 100%);
+    box-shadow:
+      0 0 0 15px var(--rojo-osc),
+      0 0 0 21px var(--rojo-borde),
+      0 26px 52px rgba(0,0,0,0.5),
+      inset 0 0 60px rgba(111,8,25,0.14);
+    transition: transform 0.04s ease, box-shadow 0.04s ease;
+    outline-offset: 26px;
+    outline-color: var(--blanco);
+    overflow: hidden;
+  }
+  .bombo::before {
+    content: "";
+    position: absolute;
+    inset: -21px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, #e6cfd4 0deg 4deg, transparent 4deg 45deg);
+    -webkit-mask: radial-gradient(circle, transparent 50%, #000 51%, #000 56%, transparent 57%);
+            mask: radial-gradient(circle, transparent 50%, #000 51%, #000 56%, transparent 57%);
+    pointer-events: none;
+    opacity: 0.85;
+  }
+  /* "Ro!" que rema */
+  .ro {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: clamp(2.6rem, 15vw, 5.4rem);
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    color: var(--rojo);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.08);
+    pointer-events: none;
+    transform-origin: 50% 62%;
+    animation: remar 1.5s cubic-bezier(0.5, 0, 0.4, 1) infinite;
+  }
+  /* Remada: alcance adelante (catch) → tirón rápido atrás (drive) → recuperación lenta */
+  @keyframes remar {
+    0%   { transform: translate(-11%, 5%) rotate(-9deg); }   /* catch */
+    28%  { transform: translate(11%, -5%) rotate(8deg); }    /* drive (rápido) */
+    40%  { transform: translate(12%, -4%) rotate(9deg); }    /* finish */
+    100% { transform: translate(-11%, 5%) rotate(-9deg); }   /* recovery (lento) */
+  }
+
+  .bombo:active {
+    transform: scale(0.955);
+    box-shadow:
+      0 0 0 15px var(--rojo-osc),
+      0 0 0 21px var(--rojo-borde),
+      0 10px 24px rgba(0,0,0,0.45),
+      inset 0 0 90px rgba(111,8,25,0.28);
+  }
+  .bombo.hit { animation: shake 0.16s ease; }
+  @keyframes shake {
+    0%,100% { transform: translate(0,0) scale(0.98); }
+    25% { transform: translate(-4px,2px) scale(0.98); }
+    75% { transform: translate(4px,-2px) scale(0.98); }
+  }
+  .hint {
+    font-size: 0.85rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+  }
+  .transport {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    z-index: 1;
+  }
+  .ctrl {
+    border: none;
+    cursor: pointer;
+    font-weight: 900;
+    color: var(--rojo);
+    background: var(--blanco);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.28);
+    transition: transform 0.05s ease;
+    font-family: inherit;
+    display: grid;
+    place-items: center;
+    line-height: 1;
+  }
+  .ctrl:active { transform: scale(0.92); }
+  .play {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+  }
+  .play.on { color: var(--azul); }
+  .tempo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.16);
+    padding: 8px 10px;
+    border-radius: 999px;
+  }
+  .step {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    font-size: 1.6rem;
+  }
+  .bpm { min-width: 76px; text-align: center; color: var(--blanco); }
+  .bpm span { font-size: 1.5rem; font-weight: 900; display: block; line-height: 1; }
+  .bpm small { font-size: 0.6rem; letter-spacing: 0.22em; opacity: 0.85; }
+
+  .panel {
+    z-index: 1;
+    width: min(92vw, 440px);
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .panel[hidden] { display: none; }
+  .presets { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    border: none; cursor: pointer;
+    font-family: inherit; font-weight: 800;
+    font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--blanco); background: rgba(255,255,255,0.15);
+    padding: 8px 12px; border-radius: 999px;
+    transition: transform 0.05s ease, background 0.15s ease, color 0.15s ease;
+  }
+  .chip:active { transform: scale(0.94); }
+  .chip.active { background: var(--blanco); color: var(--rojo); }
+  .sliders { display: flex; flex-direction: column; gap: 12px; }
+  .sliders label {
+    display: grid;
+    grid-template-columns: 62px 1fr 42px;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--blanco); opacity: 0.92;
+  }
+  .sliders input[type="range"] { width: 100%; accent-color: var(--rojo); }
+  .sliders output { font-variant-numeric: tabular-nums; text-align: right; opacity: 0.8; }
+
+  .shake-btn {
+    z-index: 1;
+    border: 1.5px solid rgba(255,255,255,0.55);
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--blanco);
+    background: rgba(0,0,0,0.22);
+    padding: 11px 20px;
+    border-radius: 999px;
+    transition: transform 0.05s ease, background 0.15s ease, border-color 0.15s ease;
+  }
+  .shake-btn:active { transform: scale(0.95); }
+  .shake-btn.on {
+    background: var(--blanco);
+    color: var(--rojo);
+    border-color: var(--blanco);
+  }
+  .shake-note {
+    z-index: 1;
+    max-width: min(88vw, 420px);
+    text-align: center;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--blanco);
+    background: rgba(0,0,0,0.35);
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-top: -18px;
+  }
+  .shake-note[hidden] { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bombo, .bombo.hit { transition: none; animation: none; }
+    .ro { animation: none; transform: none; }
+  }
+</style>
 </head>
 <body>
-    <h1>Bombo</h1>
+  <div class="wrap">
+    <div class="kicker">
+      <svg class="flag" viewBox="0 0 22 16" aria-hidden="true">
+        <rect width="22" height="16" fill="#c8102e"/>
+        <rect x="6" y="0" width="4" height="16" fill="#ffffff"/>
+        <rect x="0" y="6" width="22" height="4" fill="#ffffff"/>
+        <rect x="7" y="0" width="2" height="16" fill="#00205b"/>
+        <rect x="0" y="7" width="22" height="2" fill="#00205b"/>
+      </svg>Norge
+    </div>
+    <button class="bombo" id="bombo" aria-label="Tocar el bombo">
+      <span class="ro" aria-hidden="true">Ro!</span>
+    </button>
+    <p class="hint">Presiona para tocar</p>
+
+    <button class="shake-btn" id="shakeBtn">📳 Activar sacudida</button>
+    <p class="shake-note" id="shakeNote" hidden></p>
+
+    <div class="transport">
+      <button class="ctrl play" id="play" aria-label="Reproducir en automático">
+        <span id="playIcon">▶</span>
+      </button>
+      <div class="tempo">
+        <button class="ctrl step" id="slower" aria-label="Bajar tempo">−</button>
+        <div class="bpm"><span id="bpmVal">100</span><small>BPM</small></div>
+        <button class="ctrl step" id="faster" aria-label="Subir tempo">+</button>
+      </div>
+      <button class="ctrl step" id="gear" aria-label="Ajustes de sonido">⚙</button>
+    </div>
+
+    <div class="panel" id="panel" hidden>
+      <div class="presets" id="presets"></div>
+      <div class="sliders">
+        <label>Tono<input type="range" id="s_tune" min="0.7" max="1.4" step="0.01"><output id="o_tune"></output></label>
+        <label>Cuerpo<input type="range" id="s_body" min="0.12" max="0.5" step="0.01"><output id="o_body"></output></label>
+        <label>Sub<input type="range" id="s_sub" min="0" max="1.2" step="0.01"><output id="o_sub"></output></label>
+        <label>Ataque<input type="range" id="s_attack" min="0" max="1.6" step="0.01"><output id="o_attack"></output></label>
+        <label>Reverb<input type="range" id="s_reverb" min="0" max="0.5" step="0.01"><output id="o_reverb"></output></label>
+        <label>Sacudida<input type="range" id="s_shake" min="8" max="30" step="1"><output id="o_shake"></output></label>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // --- Síntesis realista de bombo de estadio (capas + reverb) ---
+  const SR = 44100;
+
+  // Reverb Schroeder simple (comb en paralelo + allpass en serie) para dar
+  // la cola/espacio de un estadio.
+  function comb(input, delay, feedback, damp) {
+    const buf = new Float32Array(delay);
+    const out = new Float32Array(input.length);
+    let i = 0, store = 0;
+    for (let k = 0; k < input.length; k++) {
+      const y = buf[i];
+      store = y * (1 - damp) + store * damp;
+      buf[i] = input[k] + store * feedback;
+      i = (i + 1) % delay;
+      out[k] = y;
+    }
+    return out;
+  }
+  function allpass(input, delay, g) {
+    const buf = new Float32Array(delay);
+    const out = new Float32Array(input.length);
+    let i = 0;
+    for (let k = 0; k < input.length; k++) {
+      const b = buf[i];
+      out[k] = -input[k] + b;
+      buf[i] = input[k] + b * g;
+      i = (i + 1) % delay;
+    }
+    return out;
+  }
+  function reverb(dry) {
+    const c = [1557, 1617, 1491, 1422].map((d) => comb(dry, d, 0.72, 0.28));
+    let wet = new Float32Array(dry.length);
+    for (let k = 0; k < wet.length; k++) wet[k] = (c[0][k] + c[1][k] + c[2][k] + c[3][k]) * 0.25;
+    wet = allpass(wet, 225, 0.5);
+    wet = allpass(wet, 556, 0.5);
+    return wet;
+  }
+
+  function renderKick(p) {
+    const dur = 1.15, n = Math.floor(SR * dur);
+    const dry = new Float32Array(n);
+    let phF = 0, phSub = 0, phMode = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / SR;
+
+      // Fundamental con caída de tono (el "cuerpo" del parche)
+      const f0 = (52 + (95 - 52) * Math.exp(-t / 0.05)) * p.tune;
+      phF += (2 * Math.PI * f0) / SR;
+      const body = Math.sin(phF) * Math.exp(-t / p.body);
+
+      // Sub grave (peso "en el pecho" del estadio)
+      const fSub = (38 + (46 - 38) * Math.exp(-t / 0.12)) * p.tune;
+      phSub += (2 * Math.PI * fSub) / SR;
+      const sub = Math.sin(phSub) * Math.exp(-t / (p.body * 1.6)) * p.sub;
+
+      // Modo inarmónico de la membrana (carácter de tambor)
+      const fMode = (150 + (240 - 150) * Math.exp(-t / 0.03)) * p.tune;
+      phMode += (2 * Math.PI * fMode) / SR;
+      const mode = Math.sin(phMode) * Math.exp(-t / 0.09) * 0.25;
+
+      // Ataque del mazo: "knock" tonal + ruido de madera filtrado
+      const knock = Math.sin(2 * Math.PI * 1650 * t) * Math.exp(-t / 0.004) * 0.5 * p.attack;
+      const wood = (Math.random() * 2 - 1) * Math.exp(-t / 0.012) * 0.4 * p.attack;
+
+      dry[i] = Math.tanh((body + sub + mode + knock + wood) * 1.15);
+    }
+
+    // Mezcla seco + cola de estadio
+    const wet = reverb(dry);
+    const out = new Float32Array(n);
+    let peak = 1e-6;
+    for (let i = 0; i < n; i++) {
+      out[i] = dry[i] + wet[i] * p.reverb;
+      const a = Math.abs(out[i]);
+      if (a > peak) peak = a;
+    }
+    const norm = 0.95 / peak;
+    for (let i = 0; i < n; i++) out[i] *= norm;
+
+    return { samples: out, sampleRate: SR };
+  }
+
+  function encodeWav({ samples, sampleRate }) {
+    const n = samples.length;
+    const buffer = new ArrayBuffer(44 + n * 2);
+    const view = new DataView(buffer);
+    const str = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+    str(0, "RIFF"); view.setUint32(4, 36 + n * 2, true); str(8, "WAVE");
+    str(12, "fmt "); view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+    str(36, "data"); view.setUint32(40, n * 2, true);
+    let o = 44;
+    for (let i = 0; i < n; i++) {
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+      o += 2;
+    }
+    return buffer;
+  }
+
+  // Parámetros de sonido ajustables
+  const params = { tune: 1.0, body: 0.28, sub: 0.8, attack: 1.0, reverb: 0.24 };
+
+  const PRESETS = {
+    "Estadio":        { tune: 1.00, body: 0.30, sub: 0.85, attack: 1.00, reverb: 0.30 },
+    "Barra brava":    { tune: 1.06, body: 0.24, sub: 0.70, attack: 1.35, reverb: 0.16 },
+    "Cancha seca":    { tune: 1.00, body: 0.18, sub: 0.50, attack: 1.10, reverb: 0.04 },
+    "Sub profundo":   { tune: 0.85, body: 0.42, sub: 1.15, attack: 0.80, reverb: 0.26 },
+    "Tambor marcial": { tune: 1.20, body: 0.16, sub: 0.30, attack: 1.45, reverb: 0.10 },
+    "Estadio XL":     { tune: 0.92, body: 0.44, sub: 1.00, attack: 0.90, reverb: 0.46 }
+  };
+
+  let RENDER = renderKick(params);
+  let wavUrl = URL.createObjectURL(new Blob([encodeWav(RENDER)], { type: "audio/wav" }));
+
+  const POOL = 8, pool = [];
+  for (let i = 0; i < POOL; i++) {
+    const a = document.createElement("audio");
+    a.src = wavUrl; a.preload = "auto"; a.style.display = "none";
+    document.body.appendChild(a); a.load(); pool.push(a);
+  }
+  let idx = 0;
+  let mode = "html";
+
+  let ac, acBuffer;
+  function webAudioKick() {
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+    if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === "suspended") ac.resume();
+    if (!acBuffer) {
+      acBuffer = ac.createBuffer(1, RENDER.samples.length, RENDER.sampleRate);
+      acBuffer.copyToChannel(RENDER.samples, 0);
+    }
+    const src = ac.createBufferSource();
+    src.buffer = acBuffer;
+    const g = ac.createGain();
+    g.gain.value = 0.95;
+    src.connect(g).connect(ac.destination);
+    src.start();
+  }
+
+  // Regenera el sample con los parámetros actuales
+  function rebuild() {
+    RENDER = renderKick(params);
+    const newUrl = URL.createObjectURL(new Blob([encodeWav(RENDER)], { type: "audio/wav" }));
+    URL.revokeObjectURL(wavUrl);
+    wavUrl = newUrl;
+    pool.forEach((a) => { a.src = wavUrl; a.load(); });
+    acBuffer = null; // se reconstruye en el próximo webAudioKick
+  }
+
+  function playSound() {
+    if (mode === "webaudio") { webAudioKick(); return; }
+    const a = pool[idx];
+    idx = (idx + 1) % POOL;
+    try { a.currentTime = 0; } catch (e) {}
+    const p = a.play();
+    if (p && p.catch) {
+      p.catch(() => { mode = "webaudio"; try { webAudioKick(); } catch (e) {} });
+    }
+  }
+
+  const btn = document.getElementById("bombo");
+  function hit() {
+    playSound();
+    btn.classList.remove("hit");
+    void btn.offsetWidth;
+    btn.classList.add("hit");
+  }
+
+  btn.addEventListener("pointerdown", (e) => { e.preventDefault(); hit(); });
+  btn.addEventListener("keydown", (e) => {
+    if ((e.key === "Enter" || e.key === " ") && !e.repeat) { e.preventDefault(); hit(); }
+  });
+
+  // --- Reproducción automática + tempo ---
+  const MIN_BPM = 40, MAX_BPM = 240, STEP = 5;
+  let bpm = 100;
+  let playing = false;
+  let timer = null;
+
+  const playBtn = document.getElementById("play");
+  const playIcon = document.getElementById("playIcon");
+  const bpmVal = document.getElementById("bpmVal");
+  const slower = document.getElementById("slower");
+  const faster = document.getElementById("faster");
+
+  const beatMs = () => 60000 / bpm;
+
+  function restartTimer() {
+    clearInterval(timer);
+    timer = setInterval(hit, beatMs());
+  }
+  function start() {
+    playing = true;
+    playBtn.classList.add("on");
+    playIcon.textContent = "❚❚";
+    hit();            // primer golpe inmediato
+    restartTimer();
+  }
+  function stop() {
+    playing = false;
+    playBtn.classList.remove("on");
+    playIcon.textContent = "▶";
+    clearInterval(timer);
+    timer = null;
+  }
+  function setBpm(v) {
+    bpm = Math.max(MIN_BPM, Math.min(MAX_BPM, v));
+    bpmVal.textContent = bpm;
+    if (playing) restartTimer();
+  }
+
+  playBtn.addEventListener("click", () => { playing ? stop() : start(); });
+  slower.addEventListener("click", () => setBpm(bpm - STEP));
+  faster.addEventListener("click", () => setBpm(bpm + STEP));
+
+  // --- Panel de ajustes de sonido ---
+  const panel = document.getElementById("panel");
+  const gear = document.getElementById("gear");
+  const presetsBox = document.getElementById("presets");
+  const sliders = {
+    tune: document.getElementById("s_tune"),
+    body: document.getElementById("s_body"),
+    sub: document.getElementById("s_sub"),
+    attack: document.getElementById("s_attack"),
+    reverb: document.getElementById("s_reverb")
+  };
+  const outs = {
+    tune: document.getElementById("o_tune"),
+    body: document.getElementById("o_body"),
+    sub: document.getElementById("o_sub"),
+    attack: document.getElementById("o_attack"),
+    reverb: document.getElementById("o_reverb")
+  };
+
+  function syncControls() {
+    for (const k in sliders) {
+      sliders[k].value = params[k];
+      outs[k].textContent = Number(params[k]).toFixed(2);
+    }
+  }
+
+  // Botones de presets
+  Object.keys(PRESETS).forEach((name) => {
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.textContent = name;
+    b.dataset.name = name;
+    b.addEventListener("click", () => applyPreset(name));
+    presetsBox.appendChild(b);
+  });
+  function markActivePreset() {
+    let match = "";
+    for (const name in PRESETS) {
+      const p = PRESETS[name];
+      if (Object.keys(p).every((k) => Math.abs(p[k] - params[k]) < 1e-9)) { match = name; break; }
+    }
+    presetsBox.querySelectorAll(".chip").forEach((c) => {
+      c.classList.toggle("active", c.dataset.name === match);
+    });
+  }
+  function applyPreset(name) {
+    Object.assign(params, PRESETS[name]);
+    syncControls();
+    markActivePreset();
+    rebuild();
+    hit(); // vista previa
+  }
+
+  // Sliders: valor en vivo + re-render con pequeño retraso
+  let rebuildTimer = null;
+  for (const k in sliders) {
+    sliders[k].addEventListener("input", () => {
+      params[k] = parseFloat(sliders[k].value);
+      outs[k].textContent = params[k].toFixed(2);
+      markActivePreset();
+      clearTimeout(rebuildTimer);
+      rebuildTimer = setTimeout(rebuild, 180);
+    });
+    // al soltar, reproducir una vista previa
+    sliders[k].addEventListener("change", () => { clearTimeout(rebuildTimer); rebuild(); hit(); });
+  }
+
+  gear.addEventListener("click", () => {
+    panel.hidden = !panel.hidden;
+    gear.classList.toggle("on", !panel.hidden);
+  });
+
+  // --- Detección de sacudida (acelerómetro) ---
+  const shakeBtn = document.getElementById("shakeBtn");
+  const shakeNote = document.getElementById("shakeNote");
+  const sShake = document.getElementById("s_shake");
+  const oShake = document.getElementById("o_shake");
+  let shakeOn = false;
+  let shakeThreshold = 16;
+  let lastShake = 0;
+
+  const inIframe = window.self !== window.top;
+
+  function note(msg) {
+    if (!msg) { shakeNote.hidden = true; return; }
+    shakeNote.hidden = false;
+    shakeNote.textContent = msg;
+  }
+
+  sShake.value = shakeThreshold;
+  oShake.textContent = shakeThreshold;
+  sShake.addEventListener("input", () => {
+    shakeThreshold = parseFloat(sShake.value);
+    oShake.textContent = shakeThreshold;
+  });
+
+  function onMotion(e) {
+    const a = e.accelerationIncludingGravity || e.acceleration;
+    if (!a) return;
+    const mag = Math.sqrt((a.x || 0) ** 2 + (a.y || 0) ** 2 + (a.z || 0) ** 2);
+    const now = Date.now();
+    if (mag > shakeThreshold && now - lastShake > 140) {
+      lastShake = now;
+      hit();
+    }
+  }
+
+  function enableShake() {
+    window.addEventListener("devicemotion", onMotion);
+    shakeOn = true;
+    shakeBtn.classList.add("on");
+    shakeBtn.textContent = "📳 Sacudida activada";
+    note("Mueve el teléfono con fuerza para tocar el bombo. Ajusta la sensibilidad en ⚙.");
+  }
+  function disableShake() {
+    window.removeEventListener("devicemotion", onMotion);
+    shakeOn = false;
+    shakeBtn.classList.remove("on");
+    shakeBtn.textContent = "📳 Activar sacudida";
+    note("");
+  }
+
+  shakeBtn.addEventListener("click", async () => {
+    if (shakeOn) { disableShake(); return; }
+
+    // Dentro del visor de la app (iframe) el sensor está bloqueado por política de permisos.
+    if (inIframe) {
+      note("El visor de la app bloquea el sensor de movimiento. Abre este archivo en Safari (menú ⋯ → descargar y abrir en Archivos) para usar la sacudida.");
+      return;
+    }
+    if (!window.isSecureContext) {
+      note("El sensor necesita una conexión segura (https). Ábrelo en Safari.");
+      return;
+    }
+
+    try {
+      const D = window.DeviceMotionEvent;
+      if (D && typeof D.requestPermission === "function") {
+        const res = await D.requestPermission();
+        if (res !== "granted") {
+          note("Permiso denegado. En el iPhone: Ajustes → Apps → Safari → activa \"Movimiento y orientación\", luego recarga esta página y vuelve a intentar.");
+          return;
+        }
+      }
+      hit();          // desbloquea el audio con el mismo gesto
+      enableShake();
+    } catch (err) {
+      note("Este equipo no expone el sensor de movimiento al navegador.");
+    }
+  });
+
+  syncControls();
+  markActivePreset();
+</script>
 </body>
 </html>
